@@ -1,0 +1,137 @@
+---
+title: "DataAnalysis"
+output: html_document
+---
+
+code taken from tutorial 4 learning from biostats
+
+##parametric route
+
+reading in the data
+```{r}
+pills <- read.csv(file.choose(), header = TRUE)
+```
+
+installing/loading in packages
+```{r}
+install.packages("pgirmess")
+library(stats)
+library(pgirmess)
+library(psych)
+```
+
+aov is the anova test and the results are attached to the time.fit and summary allows us to seethe results
+```{r}
+time.fit <- aov(Time ~ as.factor(Exposure_Level), data = pills)
+```
+
+before analysing the output we need to test the data for noramlity and homogeny of variances
+here were testing the normality of the residuals and making two graphs to see them
+```{r}
+time.res <- resid(time.fit)
+qqnorm(time.res)
+qqline(time.res)
+hist(time.res)
+```
+
+shaprio-wilks test for the normal distribution
+p>0.05 normal
+p<0.05 not normal
+```{r}
+shapiro.test(time.res)
+```
+
+testing for the homogeneity of variance with Bartlett test
+p>0.05 homogeneous
+p<0.05 not homogeneous
+```{r}
+bartlett.test(Time ~ Exposure_Level, pills)
+```
+
+flingers test
+p>0.05 homogeneous
+p<0.05 not homogeneous
+```{r}
+library(e1071)
+fligner.test(Time ~ Exposure_Level, pills)
+```
+
+boxplot of pills data
+```{r}
+boxplot(Time ~ Exposure_Level, 
+        data = pills, 
+        ylab = "Time (s)", 
+        xlab = "Exposure Level", 
+        main = "Effect of maze completion time on amount of exposures",
+        las = 1)
+box()
+```
+
+look at the summary
+```{r}
+summary(time.fit)
+```
+
+we want to further investigate the impact of exposures on the specific groups so we will
+use a post-Hoc test called Tukey from the stats package
+this is done if the ANOVA is found to be significant to determine which groups vary from which, a multiple comparisons test of the treatment groups
+p adj >0.05 not significant different groups
+p adj <0.05 significant different groups
+```{r}
+TukeyHSD(time.fit)
+```
+
+##data transforming
+
+transforming code!
+the square brackets is telling R which [row, column] to go to in this case we want to look 
+at the enirety of the second column (which is the Time variable of our pills data)
+now that the pills2 data has been transformed the ANOVA test will be run in the same chunk
+this is an example of the log10 transforming
+```{r}
+pills2 <- pills
+pills2[, 2] <- log10(pills2[, 2])
+time.fit2 <- aov(Time ~ as.factor(Exposure_Level), pills2)
+time.res2 <- resid(time.fit2)
+```
+
+re-test parametric assumption
+remember
+p>0.05 normal/homogeneous
+p<0.05 not normal/not homogeneous
+```{r}
+shapiro.test(time.res2)
+bartlett.test(Time ~ Exposure_Level, pills2)
+```
+
+boxplot of new pills data
+```{r}
+boxplot(Time ~ Exposure_Level, 
+        data = pills2, 
+        ylab = "Time (s)", 
+        xlab = "Exposure Level", 
+        main = "Effect of maze completion time on amount of exposures",
+        las = 1)
+box()
+```
+
+look at the new summary
+```{r}
+summary(time.fit2)
+```
+
+
+##non parametric route
+
+non parametric!
+this is for when transforming the data didnt work earlier
+since its non-parametric we dont have to test any assumptions since there isnt any
+the non parametric equivalent is the Kruskal-Wallis test
+```{r}
+kruskal.test(Time ~ as.factor(Exposure_Level), data = pills)
+```
+
+now for the non-parametric post-hoc equivalent
+```{r}
+kruskalmc(Time ~ as.factor(Exposure_Level), data = pills)
+```
