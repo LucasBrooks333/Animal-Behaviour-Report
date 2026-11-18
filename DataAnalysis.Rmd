@@ -6,19 +6,25 @@ output: html_document
 code taken from tutorial 4 learning from biostats
 and scatter visual from asn 5 of biostats
 
-##parametric route
-
-reading in the data
-NOTE this will only work once the finished CSV has been uploaded to the repository
-```{r}
-pills <- read_csv("IsopodDataSet.csv")
-```
-
 loading in packages (if you dont have one do install.packages('packagenamehere') in your console)
 ```{r}
 library(stats)
 library(pgirmess)
 library(psych)
+library(readr)
+library(e1071)
+```
+
+##parametric route
+
+reading in the data
+top is the unfinished dataset for testing code to be smooth (it is!)
+bottom is for finished code
+```{r}
+pills <- read_csv("IsopodDataSetTesting.csv")
+```
+```{r}
+pills <- read_csv("IsopodDataSet.csv")
 ```
 
 aov is the anova test and the results are attached to the time.fit and summary allows us to seethe results
@@ -53,7 +59,6 @@ flingers test
 p>0.05 homogeneous
 p<0.05 not homogeneous
 ```{r}
-library(e1071)
 fligner.test(Time ~ Exposure_Level, pills)
 ```
 
@@ -75,12 +80,12 @@ TukeyHSD(time.fit)
 
 transforming code!
 the square brackets is telling R which [row, column] to go to in this case we want to look 
-at the enirety of the second column (which is the Time variable of our pills data)
+at the enirety of the fourth column (which is the Time variable of our pills data)
 now that the pills2 data has been transformed the ANOVA test will be run in the same chunk
 this is an example of the log10 transforming
 ```{r}
 pills2 <- pills
-pills2[, 2] <- log10(pills2[, 2])
+pills2[, 4] <- log10(pills2[, 4])
 time.fit2 <- aov(Time ~ as.factor(Exposure_Level), pills2)
 time.res2 <- resid(time.fit2)
 ```
@@ -138,7 +143,6 @@ plot(pills$Exposure_Count, pills$Time,
      main = "Scatter plot of completion time over exposure count",
      ylab = "Maze Completion Time (s)", 
      xlab = "Exposure Count (as in the exposure number)", 
-     colour = Exposure_Level,
      las = 1)
 abline(lm(pills$Time ~ pills$Exposure_Count))
 ```
