@@ -24,10 +24,10 @@ bottom is for finished code
 pills <- read_csv("IsopodDataSetTesting.csv")
 ```
 ```{r}
-pills <- read_csv("IsopodDataSet.csv")
+pills <- read_csv("IsopodDataSetFinal.csv")
 ```
 
-aov is the anova test and the results are attached to the time.fit and summary allows us to seethe results
+aov is the anova test and the results are attached to the time.fit and summary allows us to see the results
 ```{r}
 time.fit <- aov(Time ~ as.factor(Exposure_Level), data = pills)
 ```
@@ -129,9 +129,8 @@ boxplot(Time ~ Exposure_Level,
         data = pills, 
         ylab = "Maze Completion Time (s)", 
         xlab = "Exposure Level", 
-        main = "Effect of maze completion time on amount of exposures",
         las = 1)
-box()
+png("BoxPlotExposures.png")
 ```
 
 
@@ -140,9 +139,9 @@ line of best fit for the isopod data set (exposure count is x and maze completio
 NOTE do not have a main title in final report, i just put one here to be descriptive
 ```{r}
 plot(pills$Exposure_Count, pills$Time, 
-     main = "Scatter plot of completion time over exposure count",
      ylab = "Maze Completion Time (s)", 
-     xlab = "Exposure Count (as in the exposure number)", 
+     xlab = "Exposure Count", 
      las = 1)
 abline(lm(pills$Time ~ pills$Exposure_Count))
+png("ScatterPlotExposures.png")
 ```
