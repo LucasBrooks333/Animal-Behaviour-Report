@@ -125,12 +125,12 @@ kruskalmc(Time ~ as.factor(Exposure_Level), data = pills)
 boxplot of pills data
 NOTE be sure to change this to pills2 if we need to transform the data
 ```{r}
+png("BoxPlotExposures.png")
 boxplot(Time ~ Exposure_Level, 
         data = pills, 
         ylab = "Maze Completion Time (s)", 
         xlab = "Exposure Level", 
         las = 1)
-png("BoxPlotExposures.png")
 ```
 
 
@@ -138,10 +138,10 @@ adopted from asn 5 of biostats
 line of best fit for the isopod data set (exposure count is x and maze completion time is y)
 NOTE do not have a main title in final report, i just put one here to be descriptive
 ```{r}
+png("ScatterPlotExposures.png")
 plot(pills$Exposure_Count, pills$Time, 
      ylab = "Maze Completion Time (s)", 
      xlab = "Exposure Count", 
      las = 1)
 abline(lm(pills$Time ~ pills$Exposure_Count))
-png("ScatterPlotExposures.png")
 ```
