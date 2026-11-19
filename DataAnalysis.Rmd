@@ -26,6 +26,9 @@ pills <- read_csv("IsopodDataSetTesting.csv")
 ```{r}
 pills <- read_csv("IsopodDataSetFinal.csv")
 ```
+```{r}
+pills <- read_csv("barebones.csv")
+```
 
 aov is the anova test and the results are attached to the time.fit and summary allows us to see the results
 ```{r}
@@ -131,6 +134,7 @@ boxplot(Time ~ Exposure_Level,
         ylab = "Maze Completion Time (s)", 
         xlab = "Exposure Level", 
         las = 1)
+box()
 ```
 
 
