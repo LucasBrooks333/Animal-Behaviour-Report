@@ -7,37 +7,37 @@ code taken from tutorial 4 learning from biostats
 and scatter visual from asn 5 of biostats
 
 loading in packages (if you dont have one do install.packages('packagenamehere') in your console)
-```{r}
+```{r packages}
 library(stats)
 library(pgirmess)
 library(psych)
 library(readr)
 library(e1071)
+library(dplyr)
 ```
-
-##parametric route
-
 reading in the data!
 the unfinished dataset for testing code to be smooth (it is!)
-```{r}
+```{r reading in test data}
 pills <- read_csv("IsopodDataSetTesting.csv")
 ```
 here is the total data and the analysis data
-```{r}
+```{r reading in full data and final run data}
 total <- read_csv("IsopodDataSetFinal.csv")
 #this data contains every exposure of every isopod
 pills <- read_csv("barebones.csv")
 #this data contains only the last exposure of every isopod, therefore this is the one that will be used in analysis
 ```
 
+
+##parametric route (failed assumptions)
 aov is the anova test and the results are attached to the time.fit and summary allows us to see the results
-```{r}
+```{r make the anova model}
 time.fit <- aov(Time ~ as.factor(Exposure_Level), data = pills)
 ```
 
 before analysing the output we need to test the data for noramlity and homogeny of variances
 here were testing the normality of the residuals and making two graphs to see them
-```{r}
+```{r visualize parameters}
 time.res <- resid(time.fit)
 qqnorm(time.res)
 qqline(time.res)
@@ -47,26 +47,26 @@ hist(time.res)
 shaprio-wilks test for the normal distribution
 p>0.05 normal
 p<0.05 not normal
-```{r}
+```{r normality test}
 shapiro.test(time.res)
 ```
 
 testing for the homogeneity of variance with Bartlett test
 p>0.05 homogeneous
 p<0.05 not homogeneous
-```{r}
+```{r homogeneity test}
 bartlett.test(Time ~ Exposure_Level, pills)
 ```
 
 flingers test
 p>0.05 homogeneous
 p<0.05 not homogeneous
-```{r}
+```{r homogeneity test pt 2}
 fligner.test(Time ~ Exposure_Level, pills)
 ```
 
 look at the summary
-```{r}
+```{r final anova run}
 summary(time.fit)
 ```
 
@@ -75,18 +75,18 @@ use a post-Hoc test called Tukey from the stats package
 this is done if the ANOVA is found to be significant to determine which groups vary from which, a multiple comparisons test of the treatment groups
 p adj >0.05 not significant different groups
 p adj <0.05 significant different groups
-```{r}
+```{r anova post hoc}
 TukeyHSD(time.fit)
 ```
 
-##data transforming
+##data transforming (dud)
 
 transforming code!
 the square brackets is telling R which [row, column] to go to in this case we want to look 
 at the enirety of the fourth column (which is the Time variable of our pills data)
 now that the pills2 data has been transformed the ANOVA test will be run in the same chunk
 this is an example of the log10 transforming
-```{r}
+```{r log10 tranforming time}
 pills2 <- pills
 pills2[, 4] <- log10(pills2[, 4])
 time.fit2 <- aov(Time ~ as.factor(Exposure_Level), pills2)
@@ -97,13 +97,13 @@ re-test parametric assumption
 remember
 p>0.05 normal/homogeneous
 p<0.05 not normal/not homogeneous
-```{r}
+```{r retest assumptions}
 shapiro.test(time.res2)
 bartlett.test(Time ~ Exposure_Level, pills2)
 ```
 
 look at the new summary
-```{r}
+```{r anova of transformed data}
 summary(time.fit2)
 ```
 
@@ -114,12 +114,12 @@ non parametric!
 this is for when transforming the data didnt work earlier
 since its non-parametric we dont have to test any assumptions since there isnt any
 the non parametric equivalent is the Kruskal-Wallis test
-```{r}
+```{r kruskal wallace}
 kruskal.test(Time ~ as.factor(Exposure_Level), data = pills)
 ```
 
 now for the non-parametric post-hoc equivalent
-```{r}
+```{r kruskal wallace post hoc}
 kruskalmc(Time ~ as.factor(Exposure_Level), data = pills)
 ```
 
@@ -127,7 +127,7 @@ kruskalmc(Time ~ as.factor(Exposure_Level), data = pills)
 
 boxplot of pills data across exposure levels
 NOTE be sure to change this to pills2 if we need to transform the data
-```{r}
+```{r boxplot across levels}
 png("BoxPlotLevels.png", width = 600, height = 400)
 boxplot(Time ~ Exposure_Level, 
         data = pills, 
@@ -141,7 +141,7 @@ box()
 adopted from asn 5 of biostats
 line of best fit for the isopod data set (exposure count is x and maze completion time is y)
 kind of stupid, i dont want it in the report! but i will keep it here for historical purposes
-```{r}
+```{r scatter plot which is dumb}
 png("ScatterPlotExposures.png", width = 600, height = 400)
 plot(pills$Exposure_Count, pills$Time, 
      ylab = "Maze Completion Time (s)", 
@@ -151,7 +151,7 @@ abline(lm(pills$Time ~ pills$Exposure_Count))
 ```
 
 boxplot of total data across exposure counts
-```{r}
+```{r boxplot of maze completion across exposure count}
 png("BoxPlotCounts.png", width = 600, height = 400)
 boxplot(Time ~ Exposure_Count, 
         data = total, 
@@ -159,4 +159,49 @@ boxplot(Time ~ Exposure_Count,
         xlab = "Exposure Count", 
         las = 1)
 box()
+```
+
+barplot of means across exposure counts
+```{r barplot across exposure count with sd}
+desc <- describeBy(total$Time, total$Exposure_Count)
+means <- c(216.4, 143.3, 163.3, 151.0, 140.0)
+standard <- c(90.62, 109.95, 109.93, 118.09, 113.29)
+barCenters <- barplot(means, 
+                      las = 1, 
+                      names.arg = c("First", "Second", "Third", "Fourth", "Fifth"), 
+                      ylab = "Maze Completion Time (s)", 
+                      xlab = "Exposure Count", 
+                      ylim = c(0, 350))
+arrows(barCenters, means - standard, 
+       barCenters, means + standard, lwd = 1, angle = 90, code = 3) 
+box(bty = "L")
+```
+
+#running the numbers
+```{r mean completion time of the levels}
+high <- filter(pills, Exposure_Level == 'High')
+low <- filter(pills, Exposure_Level == 'Low')
+none <- filter(pills, Exposure_Level == 'None')
+mean(high$Time)
+mean(low$Time)
+mean(none$Time)
+```
+```{r mean completion time for each exposure count}
+first <- filter(total, Exposure_Count == 1)
+second <- filter(total, Exposure_Count == 2)
+third <- filter(total, Exposure_Count == 3)
+fourth <- filter(total, Exposure_Count == 4)
+fifth <- filter(total, Exposure_Count == 5)
+mean(first$Time)
+mean(second$Time)
+mean(third$Time)
+mean(fourth$Time)
+mean(fifth$Time)
+```
+```{r standard completion time for each exposure count}
+sd(first$Time)
+sd(second$Time)
+sd(third$Time)
+sd(fourth$Time)
+sd(fifth$Time)
 ```
